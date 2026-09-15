@@ -187,10 +187,61 @@ The mapping in `data/mitre_attack_map.json` covers all major NSL-KDD attack subt
 | U2R | buffer_overflow, rootkit, perl | T1068, T1014, T1055 |
 
 
+## Telegram Alert Notifications
+
+NIDA sends real-time Telegram messages when high-risk alerts are detected — phone notifications without watching the dashboard.
+
+**Bot:** [@NIDAII_bot](https://t.me/NIDAII_bot)
+
+### Setup
+
+1. Add to `.env`:
+   ```
+   TELEGRAM_BOT_TOKEN=<token from BotFather>
+   TELEGRAM_CHAT_ID=<your chat id>
+   TELEGRAM_MIN_RISK=70
+   TELEGRAM_ENABLED=true
+   ```
+
+2. **Get your Chat ID:** send `/start` to [@NIDAII_bot](https://t.me/NIDAII_bot), then open
+   `https://api.telegram.org/bot<TOKEN>/getUpdates` and copy the `"chat" → "id"` value.
+
+3. Restart the app → click **✈ Send Test Message** in the sidebar to verify.
+
+### What gets sent
+
+| Trigger | Message |
+|---|---|
+| Alert with risk ≥ `TELEGRAM_MIN_RISK` | Attack type, risk score, MITRE technique, reason, incident summary |
+| Detection run completes | Batch summary: total alerts, critical count, top category |
+
+### Example
+
+```
+🔴 NIDA Alert — DOS
+
+🎯 Attack: neptune
+⚠️ Risk Score: 86/100
+🕐 Time: 2026-09-15 08:06:51
+🛡 MITRE: T1498.001 Direct Network Flood
+
+🔍 Reason: high connection count (247 vs avg 3), SYN error rate 1.0...
+
+📋 Summary: Critical-severity DOS event — Neptune SYN-flood pattern.
+Recommend rate-limiting the source IP.
+
+NIDA — Network Intrusion Detection Agent
+```
+
+The app works fully without Telegram — notifications are silently skipped if not configured.
+
+---
+
 ## Stretch Goals (all implemented ✅)
 
 - **Real-time packet capture** — `src/packet_capture.py` uses `scapy` (primary) with `pyshark` fallback. Enter your interface name in the sidebar (e.g. `Wi-Fi`, `eth0`) and click **▶ Start Capture**. Requires [Npcap](https://npcap.com/#download) on Windows.
 - **PDF/CSV alert export** — `⬇ CSV` and `⬇ PDF` buttons on the Alerts page. PDF is landscape A4 with risk-colour-coded rows via `reportlab`; falls back to `.txt` if reportlab is absent.
+- **Telegram bot notifications** — real-time alerts via [@NIDAII_bot](https://t.me/NIDAII_bot) for every high-risk event. Configurable threshold, individual + batch summaries, works while the dashboard is closed.
 
 ---
 
