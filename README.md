@@ -170,13 +170,7 @@ The mapping in `data/mitre_attack_map.json` covers all major NSL-KDD attack subt
 | R2L | guess_passwd, ftp_write, httptunnel | T1110, T1190, T1572 |
 | U2R | buffer_overflow, rootkit, perl | T1068, T1014, T1055 |
 
----
 
-## Stretch Goals (not implemented)
-
-- Real-time packet capture via `scapy`/`pyshark`
-- PDF/CSV alert export
-- Basic HTTP authentication on the dashboard
 
 ---
 
