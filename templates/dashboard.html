@@ -73,6 +73,18 @@
         <span class="nav-icon">≋</span> FP Comparison
       </a>
 
+      <div class="nav-section-label">Capture</div>
+      <div class="capture-panel">
+        <div class="capture-status-row">
+          <span class="dot" id="cap-dot"></span>
+          <span id="cap-label" style="font-size:11px;color:var(--text-2)">Stopped</span>
+        </div>
+        <input id="cap-iface" type="text" class="capture-input" placeholder="Interface (e.g. Wi-Fi)" />
+        <button id="btn-cap-start" class="btn-capture btn-capture-start">▶ Start Capture</button>
+        <button id="btn-cap-stop"  class="btn-capture btn-capture-stop" style="display:none">■ Stop</button>
+        <div id="cap-stats" style="font-size:10px;color:var(--text-3);margin-top:4px;font-family:var(--mono)"></div>
+      </div>
+
       <div class="sidebar-footer">
         <div class="sidebar-footer-label">Dataset</div>
         <div class="sidebar-footer-val mono">NSL-KDD</div>
@@ -198,6 +210,12 @@
               <input type="range" id="filter-risk" min="0" max="100" value="0" class="risk-range">
               <span class="risk-range-val" id="filter-risk-val">0</span>
             </div>
+            <a href="/api/export/csv" class="btn btn-ghost export-btn" download>
+              <span>⬇</span> CSV
+            </a>
+            <a href="/api/export/pdf" class="btn btn-ghost export-btn" download>
+              <span>⬇</span> PDF
+            </a>
           </div>
         </div>
 

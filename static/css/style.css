@@ -173,6 +173,38 @@ a { color: inherit; text-decoration: none; }
 .sidebar-footer-label { font-size: 10px; color: var(--text-3); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 2px; }
 .sidebar-footer-val { font-family: var(--mono); font-size: 12px; color: var(--text-2); }
 
+/* Capture panel inside sidebar */
+.capture-panel {
+  padding: 10px 14px 14px;
+  border-top: 1px solid var(--border);
+}
+.capture-status-row {
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 8px;
+}
+.capture-input {
+  width: 100%; background: var(--surface2);
+  border: 1px solid var(--border2); color: var(--text);
+  border-radius: 5px; padding: 5px 8px;
+  font-size: 11.5px; font-family: var(--mono);
+  margin-bottom: 6px;
+}
+.capture-input:focus { outline: none; border-color: var(--accent); }
+.btn-capture {
+  display: block; width: 100%;
+  padding: 6px 10px; border: none; border-radius: 5px;
+  cursor: pointer; font-size: 11.5px; font-weight: 600;
+  font-family: var(--font); text-align: center;
+  transition: all .15s;
+}
+.btn-capture-start { background: var(--accent); color: #fff; }
+.btn-capture-start:hover { background: var(--accent2); }
+.btn-capture-stop  { background: var(--danger-dim); color: var(--danger); border: 1px solid rgba(239,68,68,.3); }
+.btn-capture-stop:hover { background: rgba(239,68,68,.25); }
+
+/* Export buttons */
+.export-btn { font-size: 11.5px; padding: 5px 12px; }
+
 /* =========================================================================
    MAIN
    ========================================================================= */

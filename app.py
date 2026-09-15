@@ -4,18 +4,24 @@ app.py
 Flask application entry-point for the Network Intrusion Detection Agent.
 
 Routes:
-  GET  /                    → main dashboard (charts + alert feed)
-  GET  /api/stats           → JSON: traffic stats for charts
-  GET  /api/alerts          → JSON: recent alerts (paginated)
-  GET  /api/alert/<id>      → JSON: single alert detail
+  GET  /                         → main dashboard
+  GET  /api/stats                → JSON: traffic stats for charts
+  GET  /api/alerts               → JSON: recent alerts (paginated)
+  GET  /api/alert/<id>           → JSON: single alert detail
   GET  /api/threshold-comparison → JSON: naive vs risk-score comparison
-  POST /api/simulate        → trigger detection on a batch from the test set
-  POST /api/detect          → submit one raw record for instant detection
+  POST /api/simulate             → trigger detection on a batch from the test set
+  POST /api/detect               → submit one raw record for instant detection
+  POST /api/capture/start        → start live packet capture
+  POST /api/capture/stop         → stop live packet capture
+  GET  /api/capture/status       → JSON: capture status
+  GET  /api/export/csv           → download alerts as CSV
+  GET  /api/export/pdf           → download alerts as PDF
 
 Run with:
     python app.py
 """
 
+import io
 import json
 import logging
 import os
@@ -24,7 +30,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_file
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+from dotenv import load_dotenv
+from flask import Flask, jsonify, render_template, request, Response, send_file
 
 load_dotenv()
 
@@ -404,6 +416,89 @@ def api_detect():
     except Exception as exc:
         log.exception("Single detection failed")
         return jsonify({"error": str(exc)}), 500
+
+
+
+# ---------------------------------------------------------------------------
+# Packet capture routes
+# ---------------------------------------------------------------------------
+
+@app.route("/api/capture/start", methods=["POST"])
+def api_capture_start():
+    """Start live packet capture on a NIC."""
+    if not _check_models_ready():
+        return jsonify({"error": "Models not trained yet."}), 503
+
+    data = request.get_json(force=True) or {}
+    interface = data.get("interface", "").strip()
+    if not interface:
+        # Default to the first non-loopback interface we can find
+        try:
+            import scapy.all as sc
+            ifaces = [i for i in sc.get_if_list() if "lo" not in i.lower()]
+            interface = ifaces[0] if ifaces else "eth0"
+        except Exception:
+            interface = "eth0"
+
+    from src.packet_capture import start_capture
+    result = start_capture(interface, app, db, Alert, TrafficRecord)
+    return jsonify(result)
+
+
+@app.route("/api/capture/stop", methods=["POST"])
+def api_capture_stop():
+    """Stop live packet capture."""
+    from src.packet_capture import stop_capture
+    stop_capture()
+    return jsonify({"stopped": True})
+
+
+@app.route("/api/capture/status")
+def api_capture_status():
+    """Return current capture status."""
+    from src.packet_capture import capture_status
+    return jsonify(capture_status())
+
+
+# ---------------------------------------------------------------------------
+# Export routes
+# ---------------------------------------------------------------------------
+
+@app.route("/api/export/csv")
+def api_export_csv():
+    """Download all alerts (or filtered by ?limit=N) as a CSV file."""
+    limit = min(int(request.args.get("limit", 5000)), 50000)
+    alerts = Alert.query.order_by(Alert.id.desc()).limit(limit).all()
+    alert_dicts = [a.to_dict() for a in alerts]
+
+    from src.export import export_csv
+    buf = export_csv(alert_dicts)
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    return send_file(
+        buf,
+        mimetype="text/csv",
+        as_attachment=True,
+        download_name=f"nida_alerts_{ts}.csv",
+    )
+
+
+@app.route("/api/export/pdf")
+def api_export_pdf():
+    """Download all alerts as a PDF report."""
+    limit = min(int(request.args.get("limit", 500)), 5000)
+    alerts = Alert.query.order_by(Alert.id.desc()).limit(limit).all()
+    alert_dicts = [a.to_dict() for a in alerts]
+
+    from src.export import export_pdf
+    buf, content_type = export_pdf(alert_dicts)
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    ext = "pdf" if "pdf" in content_type else "txt"
+    return send_file(
+        buf,
+        mimetype=content_type,
+        as_attachment=True,
+        download_name=f"nida_alerts_{ts}.{ext}",
+    )
 
 
 if __name__ == "__main__":

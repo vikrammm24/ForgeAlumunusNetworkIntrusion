@@ -551,10 +551,63 @@ function esc(s) {
 }
 
 /* =========================================================================
+   PACKET CAPTURE CONTROLS
+   ========================================================================= */
+let capturePoller = null;
+
+async function updateCaptureStatus() {
+  try {
+    const res  = await fetch('/api/capture/status');
+    const data = await res.json();
+    const dot   = document.getElementById('cap-dot');
+    const label = document.getElementById('cap-label');
+    const stats = document.getElementById('cap-stats');
+    const startBtn = document.getElementById('btn-cap-start');
+    const stopBtn  = document.getElementById('btn-cap-stop');
+
+    if (data.running) {
+      dot.style.background = 'var(--success)';
+      dot.classList.add('pulse');
+      label.textContent = data.backend ? `Live · ${data.backend}` : 'Running';
+      startBtn.style.display = 'none';
+      stopBtn.style.display  = 'block';
+      stats.textContent = `${data.packets_seen} pkts · ${data.alerts_generated} alerts`;
+    } else {
+      dot.style.background = data.error ? 'var(--danger)' : 'var(--text-3)';
+      dot.classList.remove('pulse');
+      label.textContent = data.error ? 'Error' : 'Stopped';
+      startBtn.style.display = 'block';
+      stopBtn.style.display  = 'none';
+      stats.textContent = data.error ? data.error : '';
+      if (capturePoller) { clearInterval(capturePoller); capturePoller = null; }
+    }
+  } catch (_) {}
+}
+
+document.getElementById('btn-cap-start').addEventListener('click', async () => {
+  const iface = document.getElementById('cap-iface').value.trim();
+  await fetch('/api/capture/start', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ interface: iface }),
+  });
+  await updateCaptureStatus();
+  // Poll every 3s while running
+  if (!capturePoller) capturePoller = setInterval(updateCaptureStatus, 3000);
+});
+
+document.getElementById('btn-cap-stop').addEventListener('click', async () => {
+  await fetch('/api/capture/stop', { method: 'POST' });
+  await updateCaptureStatus();
+  if (capturePoller) { clearInterval(capturePoller); capturePoller = null; }
+});
+
+/* =========================================================================
    INIT
    ========================================================================= */
 (async () => {
   await fetchStats();
   await fetchAlerts();
   await fetchComparison();
+  await updateCaptureStatus();
 })();
