@@ -4,6 +4,22 @@ A full-stack hackathon project that analyzes network traffic, identifies suspici
 
 ---
 
+## Dashboard Screenshots
+
+**Overview — live traffic charts, KPI cards, attack category breakdown**
+![Overview](docs/screenshots/screenshot-overview.png)
+
+**Security Alerts — MITRE-tagged alert feed with risk scores and incident summaries**
+![Alerts](docs/screenshots/screenshot-alerts.png)
+
+**Detection Analysis — detailed category and risk score distribution charts**
+![Analysis](docs/screenshots/screenshot-analysis.png)
+
+**False-Positive Comparison — full threshold grid, naive vs weighted risk-score**
+![FP Comparison](docs/screenshots/screenshot-fp-comparison.png)
+
+---
+
 ## Demo Pitch Points
 
 | Feature | Concrete outcome |
@@ -171,6 +187,11 @@ The mapping in `data/mitre_attack_map.json` covers all major NSL-KDD attack subt
 | U2R | buffer_overflow, rootkit, perl | T1068, T1014, T1055 |
 
 
+## Stretch Goals (all implemented ✅)
+
+- **Real-time packet capture** — `src/packet_capture.py` uses `scapy` (primary) with `pyshark` fallback. Enter your interface name in the sidebar (e.g. `Wi-Fi`, `eth0`) and click **▶ Start Capture**. Requires [Npcap](https://npcap.com/#download) on Windows.
+- **PDF/CSV alert export** — `⬇ CSV` and `⬇ PDF` buttons on the Alerts page. PDF is landscape A4 with risk-colour-coded rows via `reportlab`; falls back to `.txt` if reportlab is absent.
+- **Basic HTTP authentication** — not yet added (low priority for hackathon demo).
 
 ---
 
