@@ -331,15 +331,23 @@ a { color: inherit; text-decoration: none; }
 /* =========================================================================
    CHARTS GRID
    ========================================================================= */
-.charts-grid {
+/* Row 1: 3 columns — Traffic Volume spans 2, Donut takes 1 */
+.charts-grid-top {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 2fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border-bottom: 1px solid var(--border);
+}
+/* Row 2: exactly 2 equal columns — no phantom cell */
+.charts-grid-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 1px;
   background: var(--border);
   border-bottom: 1px solid var(--border);
 }
 .chart-card { background: var(--surface); padding: 16px 20px; min-width: 0; }
-.chart-card.span-2 { grid-column: span 2; }
 
 .chart-header {
   display: flex; justify-content: space-between; align-items: center;
@@ -354,7 +362,13 @@ a { color: inherit; text-decoration: none; }
 
 /* Fixed-height wrapper — Chart.js sizes to this, not the viewport */
 .chart-wrap { position: relative; height: 160px; width: 100%; }
-.chart-card.span-2 .chart-wrap { height: 140px; }
+
+/* Empty state shown before any detection run */
+.chart-empty {
+  height: 160px; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: var(--text-3);
+  border: 1px dashed var(--border2); border-radius: 6px;
+}
 
 /* =========================================================================
    TABLE CARD

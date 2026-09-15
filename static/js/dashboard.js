@@ -41,7 +41,31 @@ let chartBar2, chartHistogram2;
 // the .chart-wrap container height set in CSS, not by the canvas aspect ratio.
 const BASE = { responsive: true, maintainAspectRatio: false };
 
+function showChartEmpty() {
+  ['chartVolume','chartDonut','chartBar','chartHistogram'].forEach(id => {
+    const wrap = document.getElementById(id)?.parentElement;
+    if (!wrap) return;
+    wrap.querySelector('canvas').style.display = 'none';
+    if (!wrap.querySelector('.chart-empty')) {
+      const div = document.createElement('div');
+      div.className = 'chart-empty';
+      div.textContent = 'Run Detection to populate charts';
+      wrap.appendChild(div);
+    }
+  });
+}
+
+function showChartCanvases() {
+  ['chartVolume','chartDonut','chartBar','chartHistogram'].forEach(id => {
+    const canvas = document.getElementById(id);
+    if (canvas) canvas.style.display = '';
+    const wrap = canvas?.parentElement;
+    wrap?.querySelector('.chart-empty')?.remove();
+  });
+}
+
 function buildCharts(stats) {
+  showChartCanvases();
   // Volume line
   if (chartVolume) chartVolume.destroy();
   chartVolume = new Chart(document.getElementById('chartVolume'), {
@@ -153,6 +177,11 @@ async function fetchStats() {
     if (stats.alerts > 0) {
       badge.textContent = stats.alerts;
       badge.classList.add('visible');
+    }
+
+    if (stats.total === 0) {
+      showChartEmpty();
+      return;
     }
 
     buildCharts(stats);

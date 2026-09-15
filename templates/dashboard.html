@@ -130,23 +130,21 @@
           <div class="kpi-card">
             <div class="kpi-icon kpi-icon-blue">⬡</div>
             <div class="kpi-body">
-              <div class="kpi-value" id="stat-total">—</div>
+              <div class="kpi-value" id="stat-total">0</div>
               <div class="kpi-label">Records Processed</div>
             </div>
-            <div class="kpi-trend" id="kpi-total-trend"></div>
           </div>
           <div class="kpi-card kpi-danger">
             <div class="kpi-icon kpi-icon-red">⚡</div>
             <div class="kpi-body">
-              <div class="kpi-value" id="stat-alerts">—</div>
+              <div class="kpi-value" id="stat-alerts">0</div>
               <div class="kpi-label">Active Alerts</div>
             </div>
-            <div class="kpi-spark" id="kpi-alert-spark"></div>
           </div>
           <div class="kpi-card kpi-success">
             <div class="kpi-icon kpi-icon-green">✓</div>
             <div class="kpi-body">
-              <div class="kpi-value" id="stat-normal">—</div>
+              <div class="kpi-value" id="stat-normal">0</div>
               <div class="kpi-label">Normal Traffic</div>
             </div>
           </div>
@@ -159,8 +157,8 @@
           </div>
         </div>
 
-        <!-- Charts grid -->
-        <div class="charts-grid">
+        <!-- Charts grid: row 1 — Traffic Volume (wide) + Donut -->
+        <div class="charts-grid charts-grid-top">
           <div class="chart-card span-2">
             <div class="chart-header">
               <span class="chart-title">Traffic Volume</span>
@@ -174,6 +172,10 @@
             </div>
             <div class="chart-wrap"><canvas id="chartDonut"></canvas></div>
           </div>
+        </div>
+
+        <!-- Charts grid: row 2 — two equal columns -->
+        <div class="charts-grid charts-grid-bottom">
           <div class="chart-card">
             <div class="chart-header">
               <span class="chart-title">Attack Categories</span>
@@ -251,7 +253,7 @@
             Run detection on the Overview page to populate analysis charts.
           </div>
           <!-- Reuse the same charts, cloned by JS when this tab is active -->
-          <div class="charts-grid" id="analysis-charts-grid" style="margin-top:20px">
+          <div class="charts-grid-bottom" id="analysis-charts-grid" style="margin-top:20px">
             <div class="chart-card">
               <div class="chart-header"><span class="chart-title">Attack Categories (detail)</span></div>
               <div class="chart-wrap"><canvas id="chartBar2"></canvas></div>
