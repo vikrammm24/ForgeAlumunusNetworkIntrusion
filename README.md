@@ -191,7 +191,6 @@ The mapping in `data/mitre_attack_map.json` covers all major NSL-KDD attack subt
 
 - **Real-time packet capture** — `src/packet_capture.py` uses `scapy` (primary) with `pyshark` fallback. Enter your interface name in the sidebar (e.g. `Wi-Fi`, `eth0`) and click **▶ Start Capture**. Requires [Npcap](https://npcap.com/#download) on Windows.
 - **PDF/CSV alert export** — `⬇ CSV` and `⬇ PDF` buttons on the Alerts page. PDF is landscape A4 with risk-colour-coded rows via `reportlab`; falls back to `.txt` if reportlab is absent.
-- **Basic HTTP authentication** — not yet added (low priority for hackathon demo).
 
 ---
 
