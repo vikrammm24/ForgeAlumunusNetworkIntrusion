@@ -1,0 +1,49 @@
+# Secrets — never commit
+.env
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Trained models and encoders (large binary files)
+*.pkl
+*.joblib
+models/
+
+# Raw dataset files (downloaded at runtime)
+data/raw/
+
+# Generated database
+*.db
+*.db-wal
+*.db-shm
+
+# Comparison cache (regenerated on first run)
+data/threshold_comparison.json
+
+# Results CSVs (regenerated)
+results/
+
+# Flask logs
+flask_out.log
+flask_err.log
+flask.log
+*.log
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Build artifacts
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# IDE / OS
+.vscode/
+.idea/
+*.DS_Store
+Thumbs.db

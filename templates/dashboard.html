@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NIDA · Network Intrusion Detection Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- ================================================================== -->
+  <!-- TOP STATUS BAR                                                       -->
+  <!-- ================================================================== -->
+  <div class="statusbar">
+    <div class="statusbar-left">
+      <span class="statusbar-logo">⬡ NIDA</span>
+      <span class="statusbar-sep">|</span>
+      <span class="statusbar-item">
+        <span class="dot dot-green pulse"></span>
+        <span id="sb-status">System operational</span>
+      </span>
+      <span class="statusbar-sep">|</span>
+      <span class="statusbar-item mono" id="sb-clock">--:--:--</span>
+    </div>
+    <div class="statusbar-right">
+      <span class="statusbar-item mono" id="sb-records">0 records processed</span>
+      <span class="statusbar-sep">|</span>
+      {% if llm_mode %}
+        <span class="statusbar-item"><span class="dot dot-green"></span>LLM active</span>
+      {% else %}
+        <span class="statusbar-item"><span class="dot dot-yellow"></span>Offline mode</span>
+      {% endif %}
+      {% if not models_ready %}
+        <span class="statusbar-sep">|</span>
+        <span class="statusbar-item warn">⚠ Models not trained</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ================================================================== -->
+  <!-- SHELL: sidebar + main                                                -->
+  <!-- ================================================================== -->
+  <div class="shell">
+
+    <!-- ---- SIDEBAR ---- -->
+    <nav class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">🛡</div>
+        <div class="brand-text">
+          <div class="brand-name">NIDA</div>
+          <div class="brand-sub">Intrusion Detection</div>
+        </div>
+      </div>
+
+      <div class="nav-section-label">Monitor</div>
+      <a class="nav-item active" href="#overview" onclick="navTo('overview',this)">
+        <span class="nav-icon">◈</span> Overview
+      </a>
+      <a class="nav-item" href="#alerts" onclick="navTo('alerts',this)">
+        <span class="nav-icon">⚡</span> Alerts
+        <span class="nav-badge" id="nav-alert-count">0</span>
+      </a>
+      <a class="nav-item" href="#analysis" onclick="navTo('analysis',this)">
+        <span class="nav-icon">⬡</span> Analysis
+      </a>
+
+      <div class="nav-section-label">Evaluate</div>
+      <a class="nav-item" href="#comparison" onclick="navTo('comparison',this)">
+        <span class="nav-icon">≋</span> FP Comparison
+      </a>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-footer-label">Dataset</div>
+        <div class="sidebar-footer-val mono">NSL-KDD</div>
+        <div class="sidebar-footer-label" style="margin-top:6px">Version</div>
+        <div class="sidebar-footer-val mono">v1.0.0</div>
+      </div>
+    </nav>
+
+    <!-- ---- MAIN CONTENT ---- -->
+    <main class="main">
+
+      {% if not models_ready %}
+      <div class="inline-banner banner-warn">
+        <span class="banner-icon">⚠</span>
+        <strong>Models not trained.</strong>&ensp;Run <code>python train_all.py</code> then refresh.
+      </div>
+      {% endif %}
+
+      <!-- PAGE: OVERVIEW ------------------------------------------------ -->
+      <section id="page-overview" class="page active">
+
+        <!-- Page header -->
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Overview</h2>
+            <p class="page-subtitle">Real-time network traffic analysis and threat detection</p>
+          </div>
+          <div class="page-actions">
+            <button id="btn-simulate" class="btn btn-primary{% if not models_ready %} btn-disabled{% endif %}"
+              {% if not models_ready %}disabled{% endif %}>
+              <span class="btn-icon">▶</span>
+              Run Detection <span class="btn-hint">(200 records)</span>
+            </button>
+            <button id="btn-refresh" class="btn btn-ghost">
+              <span id="refresh-icon">↻</span> Refresh
+            </button>
+            <span id="sim-status" class="sim-status-inline"></span>
+          </div>
+        </div>
+
+        <!-- KPI strip -->
+        <div class="kpi-strip">
+          <div class="kpi-card">
+            <div class="kpi-icon kpi-icon-blue">⬡</div>
+            <div class="kpi-body">
+              <div class="kpi-value" id="stat-total">—</div>
+              <div class="kpi-label">Records Processed</div>
+            </div>
+            <div class="kpi-trend" id="kpi-total-trend"></div>
+          </div>
+          <div class="kpi-card kpi-danger">
+            <div class="kpi-icon kpi-icon-red">⚡</div>
+            <div class="kpi-body">
+              <div class="kpi-value" id="stat-alerts">—</div>
+              <div class="kpi-label">Active Alerts</div>
+            </div>
+            <div class="kpi-spark" id="kpi-alert-spark"></div>
+          </div>
+          <div class="kpi-card kpi-success">
+            <div class="kpi-icon kpi-icon-green">✓</div>
+            <div class="kpi-body">
+              <div class="kpi-value" id="stat-normal">—</div>
+              <div class="kpi-label">Normal Traffic</div>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon kpi-icon-teal">≋</div>
+            <div class="kpi-body">
+              <div class="kpi-value kpi-value-sm" id="stat-fp-reduction">—</div>
+              <div class="kpi-label" id="stat-fp-label">FP Reduction vs Naive</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts grid -->
+        <div class="charts-grid">
+          <div class="chart-card span-2">
+            <div class="chart-header">
+              <span class="chart-title">Traffic Volume</span>
+              <span class="chart-meta" id="chart-vol-meta">last 30 min</span>
+            </div>
+            <div class="chart-wrap"><canvas id="chartVolume"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <span class="chart-title">Traffic Composition</span>
+            </div>
+            <div class="chart-wrap"><canvas id="chartDonut"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <span class="chart-title">Attack Categories</span>
+            </div>
+            <div class="chart-wrap"><canvas id="chartBar"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header">
+              <span class="chart-title">Risk Score Distribution</span>
+            </div>
+            <div class="chart-wrap"><canvas id="chartHistogram"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGE: ALERTS -------------------------------------------------- -->
+      <section id="page-alerts" class="page">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Security Alerts</h2>
+            <p class="page-subtitle">Threats above the risk threshold, ranked by severity</p>
+          </div>
+          <div class="page-actions alerts-filter-row">
+            <select id="filter-category" class="filter-select">
+              <option value="">All categories</option>
+              <option value="dos">DoS</option>
+              <option value="probe">Probe</option>
+              <option value="r2l">R2L</option>
+              <option value="u2r">U2R</option>
+              <option value="UNKNOWN_ANOMALY">Unknown Anomaly</option>
+            </select>
+            <div class="filter-risk-wrap">
+              <span class="filter-risk-label">Min risk</span>
+              <input type="range" id="filter-risk" min="0" max="100" value="0" class="risk-range">
+              <span class="risk-range-val" id="filter-risk-val">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <table class="data-table" id="alerts-table">
+            <thead>
+              <tr>
+                <th style="width:130px">Timestamp</th>
+                <th style="width:160px">Attack Type</th>
+                <th style="width:90px">Risk</th>
+                <th style="width:200px">MITRE Technique</th>
+                <th>Incident Summary</th>
+                <th style="width:70px"></th>
+              </tr>
+            </thead>
+            <tbody id="alerts-tbody">
+              <tr><td colspan="6" class="empty-state">No alerts yet — run detection first.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- PAGE: ANALYSIS ------------------------------------------------ -->
+      <section id="page-analysis" class="page">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Detection Analysis</h2>
+            <p class="page-subtitle">Model performance breakdown and category statistics</p>
+          </div>
+        </div>
+        <div class="analysis-placeholder">
+          <div class="analysis-hint">
+            Run detection on the Overview page to populate analysis charts.
+          </div>
+          <!-- Reuse the same charts, cloned by JS when this tab is active -->
+          <div class="charts-grid" id="analysis-charts-grid" style="margin-top:20px">
+            <div class="chart-card">
+              <div class="chart-header"><span class="chart-title">Attack Categories (detail)</span></div>
+              <div class="chart-wrap"><canvas id="chartBar2"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-header"><span class="chart-title">Risk Score Distribution (detail)</span></div>
+              <div class="chart-wrap"><canvas id="chartHistogram2"></canvas></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGE: COMPARISON --------------------------------------------- -->
+      <section id="page-comparison" class="page">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">False-Positive Comparison</h2>
+            <p class="page-subtitle">Naive threshold vs weighted risk-score approach</p>
+          </div>
+        </div>
+        <div id="comparison-content" class="comparison-loading">
+          <div class="spinner"></div>
+          <span>Running threshold grid search…</span>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ================================================================== -->
+  <!-- ALERT DETAIL MODAL                                                   -->
+  <!-- ================================================================== -->
+  <div id="alert-modal" class="modal hidden">
+    <div class="modal-backdrop" onclick="closeModal()"></div>
+    <div class="modal-content">
+      <div class="modal-topbar">
+        <span class="modal-topbar-title">Incident Detail</span>
+        <button class="modal-close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

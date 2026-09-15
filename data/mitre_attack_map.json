@@ -1,0 +1,239 @@
+{
+  "_comment": "NSL-KDD attack type -> MITRE ATT&CK technique mapping. Sources: https://attack.mitre.org/",
+
+  "normal": {
+    "technique_id": null,
+    "technique_name": "Normal Traffic",
+    "tactic": null
+  },
+
+  "dos": {
+    "technique_id": "T1498",
+    "technique_name": "Network Denial of Service",
+    "tactic": "Impact",
+    "_comment": "DoS attacks overwhelm target resources. T1498 covers network-level flooding."
+  },
+  "neptune": {
+    "technique_id": "T1498.001",
+    "technique_name": "Direct Network Flood",
+    "tactic": "Impact",
+    "_comment": "neptune = SYN flood -- sends half-open TCP connections to exhaust server state tables"
+  },
+  "smurf": {
+    "technique_id": "T1498.002",
+    "technique_name": "Reflection Amplification",
+    "tactic": "Impact",
+    "_comment": "smurf = ICMP broadcast amplification reflecting traffic off a third party"
+  },
+  "pod": {
+    "technique_id": "T1498",
+    "technique_name": "Network Denial of Service",
+    "tactic": "Impact",
+    "_comment": "pod = Ping of Death, malformed oversized ICMP packet"
+  },
+  "teardrop": {
+    "technique_id": "T1499",
+    "technique_name": "Endpoint Denial of Service",
+    "tactic": "Impact",
+    "_comment": "teardrop exploits IP fragment reassembly bugs on the host OS"
+  },
+  "land": {
+    "technique_id": "T1498",
+    "technique_name": "Network Denial of Service",
+    "tactic": "Impact",
+    "_comment": "land sends packets with src=dst IP/port to crash/loop the target stack"
+  },
+  "back": {
+    "technique_id": "T1499.002",
+    "technique_name": "Service Exhaustion Flood",
+    "tactic": "Impact",
+    "_comment": "back = Apache back attack -- HTTP requests with too many slashes crash httpd"
+  },
+
+  "probe": {
+    "technique_id": "T1595",
+    "technique_name": "Active Scanning",
+    "tactic": "Reconnaissance",
+    "_comment": "Probe attacks gather information about hosts/services before an attack"
+  },
+  "ipsweep": {
+    "technique_id": "T1595.001",
+    "technique_name": "Scanning IP Blocks",
+    "tactic": "Reconnaissance",
+    "_comment": "ipsweep scans a range of IP addresses to discover live hosts"
+  },
+  "portsweep": {
+    "technique_id": "T1595.002",
+    "technique_name": "Vulnerability Scanning",
+    "tactic": "Reconnaissance",
+    "_comment": "portsweep scans multiple ports on a host to map open services"
+  },
+  "nmap": {
+    "technique_id": "T1595.002",
+    "technique_name": "Vulnerability Scanning",
+    "tactic": "Reconnaissance",
+    "_comment": "nmap is the canonical network mapping/port scanning tool"
+  },
+  "satan": {
+    "technique_id": "T1595.002",
+    "technique_name": "Vulnerability Scanning",
+    "tactic": "Reconnaissance",
+    "_comment": "satan = Security Administrator Tool for Analyzing Networks, an early vuln scanner"
+  },
+  "mscan": {
+    "technique_id": "T1595.002",
+    "technique_name": "Vulnerability Scanning",
+    "tactic": "Reconnaissance"
+  },
+  "saint": {
+    "technique_id": "T1595.002",
+    "technique_name": "Vulnerability Scanning",
+    "tactic": "Reconnaissance"
+  },
+
+  "r2l": {
+    "technique_id": "T1190",
+    "technique_name": "Exploit Public-Facing Application",
+    "tactic": "Initial Access",
+    "_comment": "Remote-to-Local: attacker without account gains local access. T1078/T1190 depending on method."
+  },
+  "ftp_write": {
+    "technique_id": "T1190",
+    "technique_name": "Exploit Public-Facing Application",
+    "tactic": "Initial Access",
+    "_comment": "ftp_write abuses writable anonymous FTP to plant a .rhosts file"
+  },
+  "guess_passwd": {
+    "technique_id": "T1110",
+    "technique_name": "Brute Force",
+    "tactic": "Credential Access",
+    "_comment": "guess_passwd = password guessing / credential brute force over login services"
+  },
+  "imap": {
+    "technique_id": "T1190",
+    "technique_name": "Exploit Public-Facing Application",
+    "tactic": "Initial Access",
+    "_comment": "imap exploits buffer overflow in IMAP daemon"
+  },
+  "multihop": {
+    "technique_id": "T1090",
+    "technique_name": "Proxy",
+    "tactic": "Command and Control",
+    "_comment": "multihop uses intermediate hops to obscure attacker origin"
+  },
+  "phf": {
+    "technique_id": "T1190",
+    "technique_name": "Exploit Public-Facing Application",
+    "tactic": "Initial Access",
+    "_comment": "phf = exploit of old CGI script phone directory"
+  },
+  "spy": {
+    "technique_id": "T1056",
+    "technique_name": "Input Capture",
+    "tactic": "Collection",
+    "_comment": "spy = credential harvesting / keylogging"
+  },
+  "warezclient": {
+    "technique_id": "T1078",
+    "technique_name": "Valid Accounts",
+    "tactic": "Defense Evasion",
+    "_comment": "warezclient uses legitimate credentials to exfiltrate pirated software"
+  },
+  "warezmaster": {
+    "technique_id": "T1078",
+    "technique_name": "Valid Accounts",
+    "tactic": "Defense Evasion"
+  },
+  "httptunnel": {
+    "technique_id": "T1572",
+    "technique_name": "Protocol Tunneling",
+    "tactic": "Command and Control",
+    "_comment": "httptunnel encapsulates a non-HTTP protocol inside HTTP to evade firewalls"
+  },
+  "named": {
+    "technique_id": "T1190",
+    "technique_name": "Exploit Public-Facing Application",
+    "tactic": "Initial Access",
+    "_comment": "named = DNS server exploit"
+  },
+  "sendmail": {
+    "technique_id": "T1190",
+    "technique_name": "Exploit Public-Facing Application",
+    "tactic": "Initial Access"
+  },
+  "snmpguess": {
+    "technique_id": "T1110",
+    "technique_name": "Brute Force",
+    "tactic": "Credential Access",
+    "_comment": "snmpguess brute-forces SNMP community strings"
+  },
+  "snmpgetattack": {
+    "technique_id": "T1602",
+    "technique_name": "Data from Configuration Repository",
+    "tactic": "Collection",
+    "_comment": "snmpgetattack reads device config via weak/guessed SNMP community"
+  },
+  "worm": {
+    "technique_id": "T1203",
+    "technique_name": "Exploitation for Client Execution",
+    "tactic": "Execution"
+  },
+  "xlock": {
+    "technique_id": "T1190",
+    "technique_name": "Exploit Public-Facing Application",
+    "tactic": "Initial Access"
+  },
+  "xsnoop": {
+    "technique_id": "T1056",
+    "technique_name": "Input Capture",
+    "tactic": "Collection",
+    "_comment": "xsnoop captures X Window System display to steal credentials/screenshots"
+  },
+
+  "u2r": {
+    "technique_id": "T1068",
+    "technique_name": "Exploitation for Privilege Escalation",
+    "tactic": "Privilege Escalation",
+    "_comment": "User-to-Root: attacker with local account gains root/admin privileges"
+  },
+  "buffer_overflow": {
+    "technique_id": "T1068",
+    "technique_name": "Exploitation for Privilege Escalation",
+    "tactic": "Privilege Escalation",
+    "_comment": "buffer_overflow exploits stack/heap overflow in a setuid binary"
+  },
+  "loadmodule": {
+    "technique_id": "T1055",
+    "technique_name": "Process Injection",
+    "tactic": "Privilege Escalation",
+    "_comment": "loadmodule uses IFS manipulation to load a trojan module with elevated rights"
+  },
+  "perl": {
+    "technique_id": "T1059.006",
+    "technique_name": "Python / Perl Script",
+    "tactic": "Execution",
+    "_comment": "perl exploits setuid perl scripts to execute with elevated privileges"
+  },
+  "rootkit": {
+    "technique_id": "T1014",
+    "technique_name": "Rootkit",
+    "tactic": "Defense Evasion",
+    "_comment": "rootkit installs a kernel-level rootkit to hide attacker presence"
+  },
+  "ps": {
+    "technique_id": "T1057",
+    "technique_name": "Process Discovery",
+    "tactic": "Discovery"
+  },
+  "xterm": {
+    "technique_id": "T1068",
+    "technique_name": "Exploitation for Privilege Escalation",
+    "tactic": "Privilege Escalation"
+  },
+  "sqlattack": {
+    "technique_id": "T1190",
+    "technique_name": "Exploit Public-Facing Application",
+    "tactic": "Initial Access",
+    "_comment": "sqlattack exploits SQL server vulnerabilities to gain elevated DB access"
+  }
+}
