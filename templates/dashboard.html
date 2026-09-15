@@ -85,6 +85,19 @@
         <div id="cap-stats" style="font-size:10px;color:var(--text-3);margin-top:4px;font-family:var(--mono)"></div>
       </div>
 
+      <div class="nav-section-label" style="margin-top:14px">Telegram Alerts</div>
+      <div class="capture-panel" id="tg-panel">
+        <div class="capture-status-row">
+          <span class="dot" id="tg-dot"></span>
+          <span id="tg-label" style="font-size:11px;color:var(--text-2)">Checking…</span>
+        </div>
+        <div id="tg-info" style="font-size:10px;color:var(--text-3);margin:4px 0 6px;line-height:1.5"></div>
+        <button id="btn-tg-test" class="btn-capture btn-capture-start" style="background:var(--accent-blue)">
+          ✈ Send Test Message
+        </button>
+        <div id="tg-result" style="font-size:10px;margin-top:4px;display:none"></div>
+      </div>
+
       <div class="sidebar-footer">
         <div class="sidebar-footer-label">Dataset</div>
         <div class="sidebar-footer-val mono">NSL-KDD</div>

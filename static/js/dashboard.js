@@ -640,3 +640,73 @@ document.getElementById('btn-cap-stop').addEventListener('click', async () => {
   await fetchComparison();
   await updateCaptureStatus();
 })();
+
+
+/* =========================================================================
+   TELEGRAM BOT PANEL
+   ========================================================================= */
+(function initTelegram() {
+  const dot     = document.getElementById('tg-dot');
+  const label   = document.getElementById('tg-label');
+  const info    = document.getElementById('tg-info');
+  const btn     = document.getElementById('btn-tg-test');
+  const result  = document.getElementById('tg-result');
+
+  if (!dot) return;
+
+  function setStatus(configured, data) {
+    if (configured) {
+      dot.style.background = 'var(--accent-green)';
+      label.textContent = 'Connected';
+      label.style.color = 'var(--accent-green)';
+      info.innerHTML =
+        `Bot: <b>@${data.bot_username}</b><br>` +
+        `Min risk: <b>${data.min_risk}</b> · ` +
+        `Enabled: <b>${data.enabled ? 'yes' : 'no'}</b>`;
+    } else {
+      dot.style.background = data.token_set ? 'var(--accent-amber)' : 'var(--text-3)';
+      label.textContent = data.token_set ? 'Chat ID missing' : 'Not configured';
+      label.style.color = data.token_set ? 'var(--accent-amber)' : 'var(--text-3)';
+      info.innerHTML = data.token_set
+        ? 'Send <b>/start</b> to @NIDAII_bot, then add<br><code>TELEGRAM_CHAT_ID=&lt;id&gt;</code> to .env'
+        : 'Add <code>TELEGRAM_BOT_TOKEN</code> and<br><code>TELEGRAM_CHAT_ID</code> to your .env';
+    }
+  }
+
+  // Check status on load
+  fetch('/api/telegram/status')
+    .then(r => r.json())
+    .then(d => setStatus(d.configured, d))
+    .catch(() => {
+      dot.style.background = 'var(--text-3)';
+      label.textContent = 'Unavailable';
+    });
+
+  // Test button
+  btn.addEventListener('click', () => {
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    result.style.display = 'none';
+
+    fetch('/api/telegram/test', { method: 'POST' })
+      .then(r => r.json())
+      .then(d => {
+        result.style.display = 'block';
+        result.style.color = d.success ? 'var(--accent-green)' : 'var(--accent-red)';
+        result.textContent = d.success ? '✅ ' + d.message : '❌ ' + d.message;
+        btn.disabled = false;
+        btn.textContent = '✈ Send Test Message';
+        // Re-check status after a successful test
+        if (d.success) {
+          fetch('/api/telegram/status').then(r => r.json()).then(d2 => setStatus(d2.configured, d2));
+        }
+      })
+      .catch(() => {
+        result.style.display = 'block';
+        result.style.color = 'var(--accent-red)';
+        result.textContent = '❌ Request failed';
+        btn.disabled = false;
+        btn.textContent = '✈ Send Test Message';
+      });
+  });
+})();

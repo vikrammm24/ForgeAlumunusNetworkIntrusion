@@ -41,6 +41,19 @@ from flask import Flask, jsonify, render_template, request, Response, send_file
 load_dotenv()
 
 # ---------------------------------------------------------------------------
+# Telegram notifier (optional -- only active when .env has TELEGRAM_BOT_TOKEN)
+# ---------------------------------------------------------------------------
+try:
+    from src.telegram_notifier import notify_alert, notify_batch_summary, send_test_message, is_configured as tg_is_configured
+    _tg_available = True
+except ImportError:
+    _tg_available = False
+    def notify_alert(a): return False          # noqa: E704
+    def notify_batch_summary(*a, **k): pass    # noqa: E704
+    def send_test_message(): return False, "notifier module not found"  # noqa: E704
+    def tg_is_configured(): return False       # noqa: E704
+
+# ---------------------------------------------------------------------------
 # Setup logging
 # ---------------------------------------------------------------------------
 logging.basicConfig(
@@ -363,7 +376,19 @@ def api_simulate():
                     new_alerts += 1
             db.session.commit()
 
+        # Send Telegram notifications (fire-and-forget, best-effort)
         alert_results = [r for r in results if r["is_alert"]]
+        if _tg_available:
+            # Notify on high-severity individual alerts (≥ TELEGRAM_MIN_RISK threshold)
+            for r in alert_results:
+                notify_alert(r)
+            # Also send a batch summary
+            critical_count = sum(1 for r in alert_results if r.get("risk_score", 0) >= 90)
+            from collections import Counter
+            cats = [r.get("attack_category", "") for r in alert_results if r.get("attack_category")]
+            top_cat = Counter(cats).most_common(1)[0][0] if cats else ""
+            notify_batch_summary(new_alerts, critical_count, top_cat)
+
         return jsonify({
             "processed": len(results),
             "new_alerts": new_alerts,
@@ -411,6 +436,9 @@ def api_detect():
                 )
                 db.session.add(al)
                 db.session.commit()
+            # Telegram notification (fire-and-forget)
+            if _tg_available:
+                notify_alert(result)
 
         return jsonify(result)
     except Exception as exc:
@@ -499,6 +527,35 @@ def api_export_pdf():
         as_attachment=True,
         download_name=f"nida_alerts_{ts}.{ext}",
     )
+
+
+# ---------------------------------------------------------------------------
+# Telegram bot routes
+# ---------------------------------------------------------------------------
+
+@app.route("/api/telegram/status")
+def api_telegram_status():
+    """Return current Telegram bot configuration status (no secrets exposed)."""
+    cfg_ok = tg_is_configured()
+    token_set = bool(os.getenv("TELEGRAM_BOT_TOKEN", "").strip())
+    chat_id_set = bool(os.getenv("TELEGRAM_CHAT_ID", "").strip())
+    min_risk = int(os.getenv("TELEGRAM_MIN_RISK", "70"))
+    enabled = os.getenv("TELEGRAM_ENABLED", "true").lower() not in ("false", "0", "no")
+    return jsonify({
+        "configured": cfg_ok,
+        "token_set": token_set,
+        "chat_id_set": chat_id_set,
+        "min_risk": min_risk,
+        "enabled": enabled,
+        "bot_username": "NIDAII_bot",
+    })
+
+
+@app.route("/api/telegram/test", methods=["POST"])
+def api_telegram_test():
+    """Send a test message to verify the bot is working."""
+    ok, msg = send_test_message()
+    return jsonify({"success": ok, "message": msg}), (200 if ok else 400)
 
 
 if __name__ == "__main__":
